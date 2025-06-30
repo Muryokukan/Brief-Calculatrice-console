@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Caculatrice")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b814129064c37f63d6331ef20ac0c32e1bff699")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86f715fe8c7f52914334e15c2d6229924630db01")]
 [assembly: System.Reflection.AssemblyProductAttribute("Caculatrice")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Caculatrice")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -29,13 +29,10 @@ while (quitter)
     switch (userChoice)
     {
         case 1:
-            Console.Clear();
-            MesFonctions.LigneSeparation();
-            MesFonctions.EcrireCentre("Calculatrice");
-            MesFonctions.LigneSeparation();
-            Console.WriteLine();
+            AfficherTitre();
 
-            continuer = true; // Réinitialiser pour chaque nouveau calcul
+            continuer = true; 
+            // Réinitialiser pour chaque nouveau calcul
             historiqueCalculs.Clear(); // Vider l'historique précédent
 
             while (continuer)
@@ -55,8 +52,7 @@ while (quitter)
                         Console.WriteLine("Veuillez entrer un nombre valide");
                         continue;
                     }
-                }
-                else
+                }else
                 {
                     Console.Write(new string(' ', (Console.WindowWidth - "Entrez un opérateur (+, -, *, /) ou '=' pour calculer : ".Length) / 2) + "Entrez un opérateur (+, -, *, /) ou '=' pour calculer : ");
                     string operateur = Console.ReadLine();
@@ -66,11 +62,21 @@ while (quitter)
                         // Calculer le résultat
                         double resultat = CalculerExpression(historiqueCalculs);
                         Console.WriteLine();
-                        MesFonctions.EcrireCentre($"Résultat : {string.Join(" ", historiqueCalculs)} = {resultat}");
+                        MesFonctions.EcrireCentre($"Résultat : {string.Join(" ", historiqueCalculs)} = {resultat:F4}");
                         Console.WriteLine();
-                        Console.WriteLine("Appuyez sur une touche pour continuer...");
-                        Console.ReadKey();
-                        continuer = false;
+
+                        // Demander si continuation
+                        MesFonctions.EcrireCentre("Nouveau calcul ? (o/n) : ");
+                        string reponse = Console.ReadLine()?.ToLower();
+
+                        continuer = (reponse == "o" || reponse == "oui");
+
+                        if (continuer)
+                        {
+                            historiqueCalculs.Clear(); // Reset pour nouveau calcul
+                        }
+                            
+
                     }else if (EstUnOperateur(operateur))
                     {
                         historiqueCalculs.Add(operateur);
@@ -81,10 +87,10 @@ while (quitter)
                     }
                 }
 
-                // Afficher l'historique actuel
+                // Afficher l'historique actuel, TODO: Essaye de mettre en place un système de rafraîchissement
                 if (historiqueCalculs.Count > 0)
                 {
-                    Console.Clear();
+                    AfficherTitre();
                     Console.WriteLine();
                     MesFonctions.EcrireCentre("Calcul en cours : " + string.Join(" ", historiqueCalculs));
                     Console.WriteLine();
@@ -131,6 +137,16 @@ static void LigneSeparation(int longueur = 50)
     EcrireCentre(new string('-', longueur));
 }
 
+// Fonction Afficher le titre Calculatrice
+static void AfficherTitre()
+{
+    Console.Clear();
+    MesFonctions.LigneSeparation();
+    MesFonctions.EcrireCentre("Calculatrice");
+    MesFonctions.LigneSeparation();
+    Console.WriteLine();
+}
+
 // Fonction pour afficher le menu principal
 static void AfficherMenu()
 {
@@ -158,43 +174,72 @@ static bool EstUnOperateur(string texte)
     return texte == "+" || texte == "-" || texte == "*" || texte == "/";
 }
 
-// Fonction pour calculer l'expression
+// Fonction pour calculer
 static double CalculerExpression(List<string> expression)
 {
+    // Si j'ai moins de 3 éléments, ce n'est pas un calcul valide
+    // Exemple : ["5"] ou ["5", "+"] ne sont pas complets
     if (expression.Count < 3) return 0;
 
-    double resultat = double.Parse(expression[0]);
+    // Je fais une COPIE de ma liste pour pouvoir la modifier sans perdre l'originale
+    List<string> calcul = new List<string>(expression);
+    
+    // ÉTAPE 1 : Je m'occupe d'abord des × et ÷ (priorité haute)
+    TraiterOperateurs(calcul, new string[] { "*", "/" });
+    
+    // ÉTAPE 2 : Ensuite je m'occupe des + et - (priorité basse)
+    TraiterOperateurs(calcul, new string[] { "+", "-" });
+    
+    // À la fin, il ne reste qu'un seul nombre : mon résultat !
+    return double.Parse(calcul[0]);
+}
 
-    for (int i = 1; i < expression.Count; i += 2)
+// Fonction qui traite certains opérateurs
+static void TraiterOperateurs(List<string> calcul, string[] operateurs)
+{
+    // Je regarde chaque position d'opérateur (1, 3, 5, 7...)
+    int position = 1;
+    
+    while (position < calcul.Count)
     {
-        if (i + 1 < expression.Count)
+        // Est-ce que l'opérateur à cette position m'intéresse ?
+        bool operateurTrouve = false;
+        foreach (string op in operateurs)
         {
-            string operateur = expression[i];
-            double nombre = double.Parse(expression[i + 1]);
-
-            switch (operateur)
+            if (calcul[position] == op)
             {
-                case "+":
-                    resultat += nombre;
-                    break;
-                case "-":
-                    resultat -= nombre;
-                    break;
-                case "*":
-                    resultat *= nombre;
-                    break;
-                case "/":
-                    if (nombre != 0)
-                        resultat /= nombre;
-                    else
-                    {
-                        Console.WriteLine("Erreur : Division par zéro !");
-                        return 0;
-                    }
-                    break;
+                operateurTrouve = true;
+                break;
             }
         }
+        
+        if (operateurTrouve)
+        {
+            // Je récupère : nombre AVANT, opérateur, nombre APRÈS
+            double nombreAvant = double.Parse(calcul[position - 1]);
+            string operateur = calcul[position];
+            double nombreApres = double.Parse(calcul[position + 1]);
+            
+            // Je calcule selon l'opérateur
+            double resultat = 0;
+            if (operateur == "+") resultat = nombreAvant + nombreApres;
+            if (operateur == "-") resultat = nombreAvant - nombreApres;
+            if (operateur == "*") resultat = nombreAvant * nombreApres;
+            if (operateur == "/") resultat = nombreAvant / nombreApres;
+            
+            // Je remplace les 3 éléments par le résultat
+            calcul[position - 1] = resultat.ToString();  // Le résultat remplace le 1er nombre
+            calcul.RemoveAt(position);                   // Je supprime l'opérateur
+            calcul.RemoveAt(position);                   // Je supprime le 2ème nombre
+            
+            // Je ne bouge pas position car la liste a raccourci
+        }
+        else
+        {
+            // Cet opérateur ne m'intéresse pas, je passe au suivant
+            position += 2;
+        }
     }
-
-    return resultat;
 }
+
+
