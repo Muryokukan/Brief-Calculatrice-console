@@ -31,7 +31,6 @@ namespace MesFonction {
             Console.WriteLine();
 
             EcrireCentre("1. Commencer à calculer");
-            //EcrireCentre("2. Afficher l'historique"); // TODO: Check comment accéder aux précédents calculs
             EcrireCentre("2. Quitter le programme");
 
             Console.WriteLine();
@@ -39,29 +38,4 @@ namespace MesFonction {
             Console.Write(new string(' ', (Console.WindowWidth - "Votre choix : ".Length) / 2) + "Votre choix : ");
         }
     }
-
-    //public static class Calculatrice
-    //{
-    //    // Test
-    //    //public static void Hello()
-    //    //{
-    //    //    Console.WriteLine("Hello");
-    //    //}
-
-    //    public static bool EstUnOperateur(string texte)
-    //    {
-    //        return texte == "+" || texte == "-" || texte == "*" || texte == "/";
-    //    }
-
-
-    //}
-
-    //public static class Historique
-    //{
-    //    // Test
-    //    //public static void Hello()
-    //    //{
-    //    //    Console.WriteLine("Hello");
-    //    //}
-    //}
 }
